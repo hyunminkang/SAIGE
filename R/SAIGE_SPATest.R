@@ -440,34 +440,36 @@ SPAGMMATtest = function(dosageFile = "",
       obj.noK$S_a = colSums(obj.noK$X1 * (y - mu.a))
     }
     MAF = min(AF, 1-AF)
-    if(MAF >= testMinMAF & markerInfo >= minInfo){
-      numPassMarker = numPassMarker + 1
-      if(traitType == "binary"){
-        if(!IsOutputAFinCaseCtrl){
-          OUT = rbind(OUT, scoreTest_SAIGE_binaryTrait(G0, AC, AF, MAF, IsSparse, obj.noK, mu.a, mu2.a, y, varRatio, Cutoff, rowHeader))
-        }else{
-          AFCase = sum(G0[y1Index])/(2*NCase)
-          AFCtrl = sum(G0[y0Index])/(2*NCtrl)
-	  OUT = rbind(OUT, c(scoreTest_SAIGE_binaryTrait(G0, AC, AF, MAF, IsSparse, obj.noK, mu.a, mu2.a, y, varRatio, Cutoff, rowHeader),AFCase, AFCtrl))
-        }
-      }else if(traitType == "quantitative"){
-        if(indChromCheck){
-	  CHR = as.character(CHR)
-          CHRv2 = as.numeric(gsub("[^0-9.]", "", CHR))
-	  if(obj.glmm.null$LOCOResult[[CHRv2]]$isLOCO){
-            mu = obj.glmm.null$LOCOResult[[CHRv2]]$fitted.values
-            mu.a<-as.vector(mu)
-          }else{
-            mu = obj.glmm.null$fitted.values
-            mu.a<-as.vector(mu)
-          }
-          obj.noK$S_a = colSums(obj.noK$X1 * (y - mu.a))
-
-        }
-        out1 = scoreTest_SAIGE_quantitativeTrait(G0, obj.noK, AC, AF, y, mu, varRatio, tauVec)
-        OUT = rbind(OUT, c(rowHeader, N, out1$BETA, out1$SE, out1$Tstat, out1$p.value, out1$var1, out1$var2))
-      }
-    } #end of the if(MAF >= bgenMinMaf & markerInfo >= bgenMinInfo)
+    if ( !is.na(MAF >= testMinMAF & markerInfo >= minInfo) ) {
+        if( MAF >= testMinMAF & markerInfo >= minInfo){
+            numPassMarker = numPassMarker + 1
+            if(traitType == "binary"){
+                if(!IsOutputAFinCaseCtrl){
+                    OUT = rbind(OUT, scoreTest_SAIGE_binaryTrait(G0, AC, AF, MAF, IsSparse, obj.noK, mu.a, mu2.a, y, varRatio, Cutoff, rowHeader))
+                }else{
+                    AFCase = sum(G0[y1Index])/(2*NCase)
+                    AFCtrl = sum(G0[y0Index])/(2*NCtrl)
+                    OUT = rbind(OUT, c(scoreTest_SAIGE_binaryTrait(G0, AC, AF, MAF, IsSparse, obj.noK, mu.a, mu2.a, y, varRatio, Cutoff, rowHeader),AFCase, AFCtrl))
+                }
+            }else if(traitType == "quantitative"){
+                if(indChromCheck){
+                    CHR = as.character(CHR)
+                    CHRv2 = as.numeric(gsub("[^0-9.]", "", CHR))
+                    if(obj.glmm.null$LOCOResult[[CHRv2]]$isLOCO){
+                        mu = obj.glmm.null$LOCOResult[[CHRv2]]$fitted.values
+                        mu.a<-as.vector(mu)
+                    }else{
+                        mu = obj.glmm.null$fitted.values
+                        mu.a<-as.vector(mu)
+                    }
+                    obj.noK$S_a = colSums(obj.noK$X1 * (y - mu.a))
+                    
+                }
+                out1 = scoreTest_SAIGE_quantitativeTrait(G0, obj.noK, AC, AF, y, mu, varRatio, tauVec)
+                OUT = rbind(OUT, c(rowHeader, N, out1$BETA, out1$SE, out1$Tstat, out1$p.value, out1$var1, out1$var2))
+            }
+        } #end of the if(MAF >= bgenMinMaf & markerInfo >= bgenMinInfo)
+    }
       #if(mth %% 100000 == 0 | mth == Mtest){
     if(mth %% numLinesOutput == 0 | !isVariant){
       if(verbose == TRUE){
